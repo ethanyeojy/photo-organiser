@@ -558,6 +558,29 @@ export function planParts(records, maxBytes, maxFiles = 60000) {
   return parts;
 }
 
+/**
+ * Work out the image type from a file's first bytes. Android gallery apps often hand over photos with no
+ * extension ("1000012345") and sometimes no MIME type, so the name alone cannot be trusted.
+ * Returns ".jpg", ".png", ".webp", ".tif", ".heic" or null.
+ */
+export function sniffImageType(bytes) {
+  const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  const ascii = (from, to) => String.fromCharCode(...b.subarray(from, to));
+  if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return ".jpg";
+  if (b.length >= 8 && b[0] === 0x89 && ascii(1, 4) === "PNG") return ".png";
+  if (b.length >= 12 && ascii(0, 4) === "RIFF" && ascii(8, 12) === "WEBP") return ".webp";
+  if (b.length >= 4 && ((b[0] === 0x49 && b[1] === 0x49 && b[2] === 42 && b[3] === 0) ||
+                        (b[0] === 0x4d && b[1] === 0x4d && b[2] === 0 && b[3] === 42))) return ".tif";
+  if (b.length >= 12 && ascii(4, 8) === "ftyp" &&
+      ["heic", "heix", "hevc", "hevx", "heim", "heis", "mif1", "msf1"].includes(ascii(8, 12))) return ".heic";
+  return null;
+}
+
+/** Give a name with no extension the detected one, so the copied file opens normally. */
+export function withExtension(name, ext) {
+  return splitExt(String(name))[1] ? String(name) : `${name}${ext}`;
+}
+
 export function entryName(rec) {
   return `${OUTPUT_ROOT_NAME}/${rec.destFolder}/${rec.destName}`;
 }

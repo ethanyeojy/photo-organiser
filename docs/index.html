@@ -65,6 +65,10 @@
   .tip { margin: 14px 0 0; padding: 12px 14px; border-radius: 14px; background: rgba(255, 255, 255, .08); color: var(--ink-soft); font-size: .9rem; }
   .tip strong { color: var(--ink); font-weight: 600; }
 
+  .pick-msg { margin: 14px 0 0; padding: 12px 14px; border-radius: 14px; background: rgba(255, 140, 120, .16); border: 1px solid rgba(255, 180, 168, .35); font-size: .9rem; display: grid; gap: 4px; }
+  .pick-msg strong { font-weight: 600; }
+  .pick-msg .detail { color: var(--ink-soft); font-size: .82rem; overflow-wrap: anywhere; }
+
   /* working */
   .work-title { font-size: 1.2rem; font-weight: 600; margin: 0 0 4px; }
   .bar { height: 8px; border-radius: 99px; background: rgba(255, 255, 255, .16); overflow: hidden; margin: 18px 0 12px; }
@@ -127,6 +131,7 @@
         <span class="dz-hint">JPG, HEIC, PNG, WebP or TIFF. Hundreds at once is fine.</span>
         <span class="btn" aria-hidden="true">Choose photos</span>
       </label>
+      <div class="pick-msg" id="pickMsg" role="alert" hidden></div>
       <ul class="facts">
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
           <span>Your photos never leave this device. They are read and packed right here in your browser.</span></li>

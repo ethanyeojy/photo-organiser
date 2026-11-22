@@ -174,6 +174,23 @@ test("planParts splits by size and count", () => {
   assert.deepEqual(o.planParts([], 10), []);
 });
 
+test("sniffImageType recognises photos by content, withExtension only fills a missing one", () => {
+  const b = (...xs) => new Uint8Array(xs);
+  const s = (text) => [...new TextEncoder().encode(text)];
+  assert.equal(o.sniffImageType(b(0xff, 0xd8, 0xff, 0xe1)), ".jpg");
+  assert.equal(o.sniffImageType(b(0x89, ...s("PNG"), 0x0d, 0x0a, 0x1a, 0x0a)), ".png");
+  assert.equal(o.sniffImageType(b(...s("RIFF"), 0, 0, 0, 0, ...s("WEBP"))), ".webp");
+  assert.equal(o.sniffImageType(b(0x49, 0x49, 42, 0)), ".tif");
+  assert.equal(o.sniffImageType(b(0x4d, 0x4d, 0, 42)), ".tif");
+  assert.equal(o.sniffImageType(b(0, 0, 0, 24, ...s("ftypheic"))), ".heic");
+  assert.equal(o.sniffImageType(b(0, 0, 0, 24, ...s("ftypmif1"))), ".heic");
+  assert.equal(o.sniffImageType(b(0, 0, 0, 24, ...s("ftypqt  "))), null);   // a video
+  assert.equal(o.sniffImageType(b(...s("GIF89a"))), null);
+  assert.equal(o.sniffImageType(b()), null);
+  assert.equal(o.withExtension("1000012345", ".jpg"), "1000012345.jpg");
+  assert.equal(o.withExtension("photo.jfif", ".jpg"), "photo.jfif");
+});
+
 test("crc32 matches the standard check value", () => {
   assert.equal(o.crc32Update(0, new TextEncoder().encode("123456789")), 0xcbf43926);
 });

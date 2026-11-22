@@ -3,7 +3,8 @@
 import {
   FALLBACK_FILENAME_MTIME, GPS_PRESENT, KNOWN_UNSUPPORTED, LOC_FAILED, LOC_NOT_REQUESTED, NominatimGeocoder,
   OUTPUT_ROOT_NAME, SUPPORTED_EXTENSIONS, UNKNOWN_DATE, applyDateFallback, applyExif, buildReport, buildTreeText,
-  buildZip, entryName, extOf, newRecord, planDestinations, planParts, resolveLocations, summarise,
+  buildZip, entryName, extOf, newRecord, planDestinations, planParts, resolveLocations, sniffImageType, summarise,
+  withExtension,
 } from "./organiser.mjs";
 
 const $ = (id) => document.getElementById(id);
@@ -91,33 +92,74 @@ async function readMetadata(rec) {
   }
 }
 
-function splitSelection(picked) {
-  const files = [], skipped = [];
+/**
+ * Decide which picked files are photos. Names and MIME types from phone galleries are unreliable
+ * (Android often gives "1000012345" with no extension, sometimes no type), so anything not clearly
+ * supported is checked by its first bytes. Returns photos as {file, name} with a usable file name.
+ */
+async function splitSelection(picked) {
+  const photos = [], skipped = [], ignored = [];
   for (const f of picked) {
     const ext = extOf(f.name);
-    if (SUPPORTED_EXTENSIONS.has(ext) || (!ext && /^image\/(jpeg|png|webp|tiff|heic|heif)$/.test(f.type))) files.push(f);
-    else if (KNOWN_UNSUPPORTED.has(ext)) skipped.push(f.name);
+    if (SUPPORTED_EXTENSIONS.has(ext)) { photos.push({ file: f, name: f.name }); continue; }
+    if (KNOWN_UNSUPPORTED.has(ext)) { skipped.push(f.name); continue; }
+    let detected = null;
+    try { detected = sniffImageType(new Uint8Array(await f.slice(0, 16).arrayBuffer())); } catch { /* unreadable */ }
+    if (detected) photos.push({ file: f, name: withExtension(f.name || "photo", detected) });
+    else ignored.push(`${f.name || "(no name)"} (${f.type || "unknown type"}, ${f.size} bytes)`);
   }
-  return { files, skipped };
+  return { photos, skipped, ignored };
+}
+
+function showPickMessage(text, details = []) {
+  const box = $("pickMsg");
+  box.replaceChildren(h("strong", {}, text), ...details.slice(0, 5).map((d) => h("span", { class: "detail" }, d)));
+  box.hidden = false;
 }
 
 // ------------------------------------------------------------------ the whole job
 async function processPhotos(picked) {
   if (state.busy) return;
-  const { files, skipped } = splitSelection(picked);
-  if (!files.length) {
-    alert(picked.length ? "None of those files are supported photos. Please choose JPG, HEIC, PNG, WebP or TIFF images." : "No photos were selected.");
-    return;
-  }
-  if (!window.exifr) { alert("The photo reader did not load. Check your connection and reload the page."); return; }
-
   state.busy = true;
+  $("pickMsg").hidden = true;
+  // React straight away so it is obvious the selection was received.
   show("workView");
   const ui = progressUI();
+  ui.stage("Checking your photos", `Received ${plural(picked.length, "file")}...`);
+  let photos, skipped, ignored;
+  try {
+    ({ photos, skipped, ignored } = await splitSelection(picked));
+  } catch (err) {
+    state.busy = false;
+    show("idleView");
+    showPickMessage(`Could not open the selected files (${err?.name || "Error"}: ${err?.message || err}). Please try again.`);
+    return;
+  }
+  if (!photos.length) {
+    state.busy = false;
+    show("idleView");
+    showPickMessage(
+      (picked.length === 1 ? "The selected file could not be read as a photo" : `None of the ${picked.length} selected files could be read as a photo`) +
+        " (JPG, HEIC, PNG, WebP or TIFF).",
+      [...skipped.map((s) => `${s} (not supported)`), ...ignored],
+    );
+    return;
+  }
+  if (!window.exifr) {
+    state.busy = false;
+    show("idleView");
+    showPickMessage("The photo reader did not load. Check your connection and reload the page.");
+    return;
+  }
+
   try {
     // 1. read dates and GPS (only the start of each file is read)
     ui.stage("Reading your photos", "Reading photos...");
-    const records = files.map((f) => newRecord(f));
+    const records = photos.map(({ file, name }) => {
+      const rec = newRecord(file);
+      rec.originalFilename = rec.relativePath = name;
+      return rec;
+    });
     await pool(records, 6, async (rec) => {
       await readMetadata(rec);
       // No embedded date? Use the date in the filename, then the date the file was saved.
@@ -152,7 +194,8 @@ async function processPhotos(picked) {
       downloads.push({ blob, count: group.length, name: parts.length === 1 ? `${stem}.zip` : `${stem}-part-${p + 1}-of-${parts.length}.zip` });
     }
     state.downloads = downloads;
-    state.report = new Blob([buildReport(records, { includeGps: false, skipped })], { type: "text/csv" });
+    state.report = new Blob([buildReport(records, { includeGps: false, skipped: skipped.concat(ignored) })], { type: "text/csv" });
+    skipped = skipped.concat(ignored);
     renderDone(records, skipped, includeLocation, geocoder);
   } catch (err) {
     ui.fail(`${err?.name || "Error"}: ${err?.message || err}`);
@@ -241,11 +284,16 @@ function reset() {
 }
 
 // ------------------------------------------------------------------ wire up
-$("photos").addEventListener("change", (e) => {
+// Some Android browsers fire "input", others "change" (most fire both). Handle whichever comes first;
+// clearing the value afterwards means the second event finds no files and is ignored.
+function onPicked(e) {
   const picked = Array.from(e.target.files || []);
+  if (!picked.length) return;
   e.target.value = "";
-  if (picked.length) processPhotos(picked);
-});
+  processPhotos(picked);
+}
+$("photos").addEventListener("input", onPicked);
+$("photos").addEventListener("change", onPicked);
 $("againBtn").addEventListener("click", reset);
 
 const dz = $("dropzone");
