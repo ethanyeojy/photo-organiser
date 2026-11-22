@@ -21,7 +21,7 @@ from photo_organiser.scanner import scan_folder, validate_folders
 from photo_organiser.ziputil import extract_jpegs
 
 APP_DIR = Path(__file__).resolve().parent
-DEFAULT_OUTPUT = APP_DIR / "output"
+DEFAULT_OUTPUT = Path.home() / "Pictures" / "Photo Organiser Output"  # the user's own folder, not the app's
 CACHE_PATH = APP_DIR / ".cache" / "geocode_cache.json"
 
 SRC_FOLDER, SRC_PHOTOS, SRC_ZIP = "Folder on this computer (fastest)", "Upload photos", "Upload a ZIP of photos"

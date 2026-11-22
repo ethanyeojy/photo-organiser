@@ -22,7 +22,7 @@ Your browser opens at http://localhost:8501. To run the tests: `pip install -r r
 3. Click **Organise photos**, then download the ZIP and the CSV report.
 
 Location lookup is **off** until you tick the consent box in the sidebar. Without it, photos go into date folders only.
-Each run writes to a new `output/run_<timestamp>/` folder, so repeated runs never overwrite anything.
+Each run writes to a new `run_<timestamp>/` folder inside your own `Pictures/Photo Organiser Output` folder (you can change this in the sidebar), so repeated runs never overwrite anything.
 
 Photos are never uploaded anywhere. `.streamlit/config.toml` also switches off Streamlit's anonymous usage stats and allows ZIP uploads up to 4 GB.
 
@@ -45,7 +45,7 @@ Photos are never uploaded anywhere. `.streamlit/config.toml` also switches off S
 - Photos edited by software that removed EXIF will be "Unknown Date" even if the filename has a date. This is deliberate.
 - Photos in the same ~1 km grid cell share one lookup, so a photo right on a town boundary may get the neighbouring town.
 - Nominatim's public server is for light use. Thousands of *different* places would be slow and may be refused; use a smaller batch or your own server.
-- The ZIP is held in memory for the download button; for very large libraries use the saved `output/run_*` folder instead.
+- The ZIP is held in memory for the download button; for very large libraries use the saved `run_*` folder in your output folder instead.
 - The live Nominatim call has been tested only with a simulated service in the automated tests.
 
 ## Future improvements (not implemented)
