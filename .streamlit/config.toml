@@ -1,0 +1,11 @@
+[server]
+maxUploadSize = 4096          # MB: allows large ZIP uploads
+
+[browser]
+gatherUsageStats = false      # no anonymous usage statistics
+
+[client]
+toolbarMode = "minimal"
+
+[theme]
+primaryColor = "#2563eb"
