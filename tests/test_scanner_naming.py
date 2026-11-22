@@ -6,11 +6,11 @@ from tests.helpers import make_jpeg
 def test_scan_finds_jpegs_case_insensitively_and_lists_unsupported(tmp_path):
     make_jpeg(tmp_path / "a.JPG")
     make_jpeg(tmp_path / "sub" / "b.jpeg")
-    (tmp_path / "c.heic").write_bytes(b"x")
+    (tmp_path / "c.mov").write_bytes(b"x")
     (tmp_path / "notes.txt").write_text("hi")
     res = scan_folder(tmp_path)
     assert sorted(f.relative_path for f in res.files) == ["a.JPG", "sub/b.jpeg"]
-    assert res.skipped == ["c.heic"]  # .txt is ignored silently
+    assert res.skipped == ["c.mov"]  # .txt is ignored silently
 
 
 def test_scan_excludes_output_dir_hidden_and_non_recursive(tmp_path):

@@ -139,7 +139,7 @@ output_base = Path(output_text.strip().strip('"').strip("'")).expanduser()
 
 # ================================================================ header
 st.title("📷 Photo Organiser")
-st.write("Sorts copies of your JPEG photos into **Date → Location** folders using the date and GPS "
+st.write("Sorts copies of your photos (JPG, HEIC, PNG, WebP, TIFF) into **Date → Location** folders using the date and GPS "
          "stored inside each photo. Your originals are never changed.")
 st.markdown("**1** Choose photos &nbsp;→&nbsp; **2** Analyse and preview &nbsp;→&nbsp; **3** Organise and download")
 
@@ -157,12 +157,12 @@ with st.container(border=True):
         st.caption("This path is on the computer **running this app** (your own PC, if you started it yourself). "
                    "Reading in place is the fastest option because nothing is copied until you organise.")
     elif source_kind == SRC_PHOTOS:
-        uploads = st.file_uploader("Drop JPG/JPEG files here", type=["jpg", "jpeg"],
+        uploads = st.file_uploader("Drop photos here (JPG, HEIC, PNG, WebP, TIFF)", type=["jpg", "jpeg", "heic", "heif", "png", "webp", "tif", "tiff"],
                                    accept_multiple_files=True, key="uploads")
         st.caption("Good for a handful of photos. For large sets, use a folder or a ZIP.")
     else:
         zip_upload = st.file_uploader("Drop a .zip file containing photos", type=["zip"], key="zip_upload")
-        st.caption("The ZIP is unpacked into a temporary folder on this computer and only JPG/JPEG files are used. "
+        st.caption("The ZIP is unpacked into a temporary folder on this computer and only photo files (JPG, HEIC, PNG, WebP, TIFF) are used. "
                    "It must be sent through the browser first, so a folder path is still faster for big libraries.")
 
 folder_path = Path(folder_text.strip().strip('"').strip("'")).expanduser() if folder_text.strip() else None
@@ -187,7 +187,7 @@ def source_problem() -> str:
             return "Type or paste a folder path first, then press Enter."
         return " ".join(validate_folders(folder_path, output_base))
     if source_kind == SRC_PHOTOS and not uploads:
-        return "Choose some JPG/JPEG files to upload first."
+        return "Choose some photos to upload first."
     if source_kind == SRC_ZIP and not zip_upload:
         return "Choose a .zip file to upload first."
     return ""
@@ -200,10 +200,10 @@ def run_analysis() -> None:
     try:
         files, skipped, warnings = [], [], []
         if source_kind == SRC_FOLDER:
-            tracker.stage("Scanning folder for JPG/JPEG files...")
+            tracker.stage("Scanning folder for photos...")
             scan = scan_folder(folder_path, exclude_dirs=[output_base], recursive=recursive)
             files, skipped, warnings = scan.files, scan.skipped, scan.warnings
-            tracker.done(f"Scanned folder: found {len(files)} JPG/JPEG file(s)")
+            tracker.done(f"Scanned folder: found {len(files)} photo(s)")
         elif source_kind == SRC_PHOTOS:
             tmp = fresh_temp_dir()
             for i, up in enumerate(uploads, 1):
@@ -217,10 +217,10 @@ def run_analysis() -> None:
         else:
             result = extract_jpegs(zip_upload, fresh_temp_dir(), tracker.update)
             files, skipped, warnings = result.files, result.skipped, result.warnings
-            tracker.done(f"Unpacked ZIP: found {len(files)} JPG/JPEG file(s)")
+            tracker.done(f"Unpacked ZIP: found {len(files)} photo(s)")
 
         if not files:
-            tracker.fail("No JPG/JPEG photos were found")
+            tracker.fail("No supported photos were found")
             for w in warnings:
                 st.warning(w)
             return
@@ -322,7 +322,7 @@ with st.container(border=True):
                 st.write("Nothing needs attention.")
         if analysis["skipped"]:
             with st.expander(f"{len(analysis['skipped'])} unsupported file(s) skipped (not copied)"):
-                st.write("Version 1 handles JPG/JPEG only.")
+                st.write("Supported: JPG, HEIC, PNG, WebP, TIFF. Videos, RAW and GIF/BMP files are skipped.")
                 st.code("\n".join(analysis["skipped"][:200]))
 
 # ================================================================ 3. organise

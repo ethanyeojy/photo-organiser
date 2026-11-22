@@ -23,12 +23,12 @@ def test_extracts_only_jpegs_and_ignores_unsafe_and_hidden(tmp_path):
     z = build_zip(tmp_path, {
         "trip/a.JPG": data, "trip/sub/a.jpg": data, "__MACOSX/._a.jpg": data,
         "../evil.jpg": data, "/abs.jpg": data, "C:/win.jpg": data,
-        "pic.png": b"x", "notes.txt": b"hi", ".hidden/h.jpg": data,
+        "pic.gif": b"x", "notes.txt": b"hi", ".hidden/h.jpg": data,
     })
     dest = tmp_path / "unpacked"
     res = extract_jpegs(z, dest)
     assert [f.relative_path for f in res.files] == ["trip/a.JPG", "trip/sub/a.jpg"]
-    assert res.skipped == ["pic.png"]
+    assert res.skipped == ["pic.gif"]
     assert len([w for w in res.warnings if "unsafe" in w]) == 3
     assert not (tmp_path / "evil.jpg").exists()
     # everything written lives under dest

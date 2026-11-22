@@ -11,8 +11,17 @@ from PIL import Image
 
 from .models import GPS_INVALID, GPS_MISSING, GPS_PRESENT, PhotoRecord
 
+try:  # lets Pillow open iPhone HEIC/HEIF photos
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+except Exception:  # not installed: HEIC files will simply be reported as unreadable
+    pass
+
 # We only read headers and never decode pixels, so very large images are fine.
 Image.MAX_IMAGE_PIXELS = None
+
+# Image formats whose embedded EXIF we read.
+SUPPORTED_FORMATS = {"JPEG", "MPO", "PNG", "WEBP", "TIFF", "HEIF"}
 
 EXIF_IFD = 0x8769
 GPS_IFD = 0x8825
@@ -88,8 +97,8 @@ def read_photo(path: Path, relative_path: str = "", original_filename: str = "")
     )
     try:
         with Image.open(path) as img:
-            if img.format != "JPEG":
-                rec.error = f"Not a JPEG file (detected {img.format})"
+            if img.format not in SUPPORTED_FORMATS:
+                rec.error = f"Unsupported image type (detected {img.format})"
                 return rec
             exif = img.getexif()
             exif_ifd = dict(exif.get_ifd(EXIF_IFD)) if exif else {}

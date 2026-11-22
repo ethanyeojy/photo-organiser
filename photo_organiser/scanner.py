@@ -8,10 +8,10 @@ from typing import Iterable, List, Optional
 
 from .models import SourceFile
 
-SUPPORTED_EXTENSIONS = {".jpg", ".jpeg"}
-# Common media types we deliberately do NOT process in v1. They are listed as "skipped".
+SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp", ".tif", ".tiff"}
+# Media types we do NOT process (no reliable embedded date/GPS we can read). Listed as "skipped".
 KNOWN_UNSUPPORTED = {
-    ".png", ".heic", ".heif", ".webp", ".tif", ".tiff", ".gif", ".bmp",
+    ".gif", ".bmp",
     ".dng", ".cr2", ".cr3", ".nef", ".arw", ".orf", ".rw2", ".raf",
     ".mov", ".mp4", ".m4v", ".avi",
 }

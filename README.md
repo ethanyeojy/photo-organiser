@@ -1,6 +1,6 @@
 # Photo Organiser
 
-Copies JPEG photos into `Organised Photos / YYYY-MM-DD / Location / filename` using the date and GPS
+Copies photos (JPG, HEIC, PNG, WebP, TIFF) into `Organised Photos / YYYY-MM-DD / Location / filename` using the date and GPS
 stored inside each photo. Originals are never modified, moved or deleted.
 
 ## Setup (Python 3.9 or newer)
@@ -17,7 +17,7 @@ Your browser opens at http://localhost:8501. To run the tests: `pip install -r r
 
 ## Using it
 
-1. Pick a folder path (fastest; a path on the computer running the app), upload JPEGs, or upload a ZIP of photos.
+1. Pick a folder path (fastest; a path on the computer running the app), upload photos, or upload a ZIP of photos.
 2. Click **Analyse photos** and review the counts and folder preview.
 3. Click **Organise photos**, then download the ZIP and the CSV report.
 
@@ -40,8 +40,7 @@ Photos are never uploaded anywhere. `.streamlit/config.toml` also switches off S
 
 ## Limitations (version 1)
 
-- **JPG/JPEG only.** PNG/WebP rarely carry reliable capture metadata; HEIC needs the extra `pillow-heif` package; RAW and video
-  need other tools. These files are listed as "skipped" and not copied.
+- **Photo formats:** JPG, HEIC, PNG, WebP and TIFF are read (HEIC via `pillow-heif`). RAW, GIF, BMP and video files are skipped because they have no reliable date/GPS we can read. Files with no embedded date can still use the optional filename/file-date estimates.
 - Photos edited by software that removed EXIF will be "Unknown Date" even if the filename has a date. This is deliberate.
 - Photos in the same ~1 km grid cell share one lookup, so a photo right on a town boundary may get the neighbouring town.
 - Nominatim's public server is for light use. Thousands of *different* places would be slow and may be refused; use a smaller batch or your own server.

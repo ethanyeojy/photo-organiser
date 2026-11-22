@@ -144,6 +144,6 @@ def write_report(
         for rel in skipped:
             row = {c: "" for c in columns}
             row.update(original_filename=csv_safe(Path(rel).name), source_relative_path=csv_safe(rel),
-                       status="Skipped: unsupported format (v1 handles JPG/JPEG only)")
+                       status="Skipped: unsupported format (videos, RAW, GIF and BMP are not handled)")
             writer.writerow(row)
     return Path(path)
