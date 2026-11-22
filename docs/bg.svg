@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3a67"/>
+      <stop offset="0.38" stop-color="#6d6a9c"/>
+      <stop offset="0.62" stop-color="#e59a8c"/>
+      <stop offset="0.78" stop-color="#f6c79a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff1d0" stop-opacity="0.95"/>
+      <stop offset="0.35" stop-color="#ffd7a3" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffd7a3" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lake" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9b5a0"/>
+      <stop offset="0.25" stop-color="#8f86a8"/>
+      <stop offset="0.7" stop-color="#34507a"/>
+      <stop offset="1" stop-color="#1b2d52"/>
+    </linearGradient>
+    <linearGradient id="far" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a80a8"/><stop offset="1" stop-color="#c79aa6"/>
+    </linearGradient>
+    <linearGradient id="mid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5b5d8c"/><stop offset="1" stop-color="#8a7f9f"/>
+    </linearGradient>
+    <linearGradient id="near" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f4468"/><stop offset="1" stop-color="#3d5273"/>
+    </linearGradient>
+    <filter id="soft" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="2.2"/></filter>
+    <filter id="blur" x="-5%" y="-20%" width="110%" height="140%"><feGaussianBlur stdDeviation="4"/></filter>
+    <linearGradient id="vig" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1330" stop-opacity="0.35"/>
+      <stop offset="0.4" stop-color="#0b1330" stop-opacity="0"/>
+      <stop offset="1" stop-color="#0b1330" stop-opacity="0.3"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <g fill="#fff" opacity="0.7">
+    <circle cx="180" cy="90" r="1.6"/><circle cx="420" cy="160" r="1.2"/><circle cx="760" cy="70" r="1.5"/>
+    <circle cx="1010" cy="140" r="1.1"/><circle cx="1290" cy="85" r="1.7"/><circle cx="1480" cy="190" r="1.2"/>
+    <circle cx="610" cy="220" r="1"/><circle cx="1150" cy="240" r="1"/>
+  </g>
+  <circle cx="1030" cy="545" r="330" fill="url(#glow)"/>
+  <circle cx="1030" cy="560" r="52" fill="#fff2d6"/>
+
+  <!-- soft clouds -->
+  <g fill="#f8d9c4" opacity="0.35" filter="url(#blur)">
+    <ellipse cx="380" cy="360" rx="230" ry="16"/><ellipse cx="520" cy="392" rx="170" ry="11"/>
+    <ellipse cx="1260" cy="330" rx="210" ry="14"/><ellipse cx="1120" cy="370" rx="150" ry="10"/>
+  </g>
+
+  <!-- mountains -->
+  <path filter="url(#soft)" fill="url(#far)" d="M0 600 L0 520 Q90 470 170 500 Q260 440 350 470 Q470 380 590 470 Q700 430 790 480 Q910 420 1010 490 Q1130 400 1250 480 Q1370 430 1460 480 Q1540 450 1600 500 L1600 600 Z"/>
+  <path fill="url(#mid)" d="M0 610 L0 560 Q120 500 230 548 Q330 470 450 540 Q540 500 640 550 Q760 490 880 560 Q1010 520 1120 565 Q1240 500 1360 560 Q1480 520 1600 570 L1600 610 Z"/>
+  <path fill="url(#near)" d="M0 620 L0 585 Q140 560 260 595 Q400 565 520 600 Q700 575 860 605 Q1040 580 1200 608 Q1400 585 1600 610 L1600 620 Z"/>
+
+  <!-- lake -->
+  <rect y="618" width="1600" height="382" fill="url(#lake)"/>
+  <g transform="translate(0,1236) scale(1,-1)" opacity="0.38" filter="url(#blur)">
+    <path fill="#6d6a9c" d="M0 600 L0 520 Q90 470 170 500 Q260 440 350 470 Q470 380 590 470 Q700 430 790 480 Q910 420 1010 490 Q1130 400 1250 480 Q1370 430 1460 480 Q1540 450 1600 500 L1600 600 Z"/>
+  </g>
+  <!-- sun reflection -->
+  <g fill="#ffe8c4" filter="url(#soft)">
+    <rect x="985" y="630" width="90" height="5" rx="2.5" opacity="0.9"/>
+    <rect x="960" y="660" width="140" height="5" rx="2.5" opacity="0.75"/>
+    <rect x="990" y="692" width="80" height="4" rx="2" opacity="0.6"/>
+    <rect x="945" y="726" width="170" height="4" rx="2" opacity="0.45"/>
+    <rect x="985" y="765" width="95" height="3" rx="1.5" opacity="0.35"/>
+    <rect x="950" y="810" width="150" height="3" rx="1.5" opacity="0.25"/>
+  </g>
+  <g fill="#fff" opacity="0.12">
+    <rect x="120" y="700" width="260" height="2"/><rect x="340" y="760" width="320" height="2"/>
+    <rect x="80" y="840" width="380" height="2"/><rect x="1180" y="720" width="300" height="2"/>
+    <rect x="1240" y="800" width="260" height="2"/><rect x="640" y="900" width="400" height="2"/>
+  </g>
+
+  <!-- birds -->
+  <g fill="none" stroke="#2b3a67" stroke-width="2" stroke-linecap="round" opacity="0.55">
+    <path d="M300 250 q10 -10 20 0 q10 -10 20 0"/><path d="M360 285 q7 -7 14 0 q7 -7 14 0"/>
+    <path d="M1380 230 q8 -8 16 0 q8 -8 16 0"/>
+  </g>
+  <rect width="1600" height="1000" fill="url(#vig)"/>
+</svg>

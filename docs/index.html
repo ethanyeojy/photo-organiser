@@ -2,137 +2,178 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2b3a67">
 <title>Photo Organiser</title>
-<meta name="description" content="Sort your photos into Date and Location folders, right in your browser. Photos never leave your device.">
+<meta name="description" content="Sort your photos into date and place folders in seconds. Everything happens on your device.">
 <style>
   :root {
-    --bg: #f6f7f9; --card: #ffffff; --text: #1a1d21; --muted: #5b6470; --line: #d9dde3;
-    --accent: #2563eb; --accent-text: #ffffff; --ok-bg: #e7f6ec; --ok-text: #14532d;
-    --warn-bg: #fff4d6; --warn-text: #6b4a00; --err: #b42318;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #111418; --card: #1b1f25; --text: #eceef1; --muted: #9aa4b1; --line: #343b45;
-      --accent: #5b8def; --accent-text: #0b1220; --ok-bg: #12301d; --ok-text: #a7e3bd;
-      --warn-bg: #3a2f10; --warn-text: #f3d58a; --err: #ff8a80;
-    }
+    --ink: #f4f6fb; --ink-soft: rgba(244, 246, 251, .72); --ink-faint: rgba(244, 246, 251, .5);
+    --glass: rgba(14, 22, 48, .58); --glass-line: rgba(255, 255, 255, .16);
+    --accent: #ffffff; --accent-ink: #1a2750; --danger: #ffb4a8;
+    --radius: 22px;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
-  h1 { font-size: 1.7rem; margin: 0 0 4px; }
-  h2 { font-size: 1.15rem; margin: 0 0 8px; }
-  p { margin: 0 0 10px; }
-  .lead { color: var(--muted); }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin: 16px 0; }
-  .banner { background: var(--ok-bg); color: var(--ok-text); border-radius: 10px; padding: 10px 14px; margin: 14px 0; }
-  .tip { background: var(--warn-bg); color: var(--warn-text); border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
-  .note { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 8px 12px; }
-  label { display: block; margin: 12px 0 4px; font-weight: 600; }
-  label.check { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; }
-  label.check input { margin-top: 5px; flex: none; }
-  input[type=text], select { width: 100%; padding: 10px; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
-  input[type=file] { width: 100%; padding: 12px; font: inherit; color: var(--text); border: 2px dashed var(--line); border-radius: 10px; background: var(--bg); }
-  .small { font-size: .88rem; color: var(--muted); }
-  .btn { font: inherit; font-weight: 600; padding: 12px 18px; border-radius: 10px; border: 0; cursor: pointer;
-         background: var(--accent); color: var(--accent-text); min-height: 44px; }
-  .btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
-  .btn:disabled { opacity: .45; cursor: not-allowed; }
-  progress { width: 100%; height: 14px; }
-  #barLabel.error { color: var(--err); font-weight: 600; }
-  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 12px 0; }
-  .metric { border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
-  .metric-value { font-size: 1.5rem; font-weight: 700; }
-  .metric-label { font-size: .82rem; color: var(--muted); }
-  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
-  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
-  td:last-child, th:last-child { text-align: right; width: 90px; }
-  pre { overflow: auto; max-height: 320px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; font-size: .82rem; }
-  ul.dl { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 10px; }
-  ul.dl .btn { width: 100%; text-align: left; }
-  details { margin: 10px 0; }
-  summary { cursor: pointer; font-weight: 600; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; color: var(--ink); background: #2b3a67;
+    font: 16px/1.55 "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .scene { position: fixed; inset: 0; z-index: -1; background: #2b3a67 url("bg.svg") center / cover no-repeat; }
+  main { min-height: 100%; max-width: 720px; margin: 0 auto; padding: max(28px, env(safe-area-inset-top)) 18px 56px; display: flex; flex-direction: column; }
+  header { text-align: center; padding: 28px 0 26px; text-shadow: 0 2px 24px rgba(10, 16, 40, .45); }
+  .mark { display: inline-flex; align-items: center; gap: 10px; font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-soft); }
+  .mark svg { width: 18px; height: 18px; }
+  h1 { font-size: clamp(2rem, 6.5vw, 3rem); font-weight: 600; letter-spacing: -.02em; line-height: 1.1; margin: 14px 0 10px; }
+  .sub { color: var(--ink-soft); max-width: 30em; margin: 0 auto; font-size: 1.05rem; }
+
+  .panel {
+    background: var(--glass); border: 1px solid var(--glass-line); border-radius: var(--radius);
+    -webkit-backdrop-filter: blur(22px) saturate(140%); backdrop-filter: blur(22px) saturate(140%);
+    box-shadow: 0 24px 60px rgba(8, 12, 32, .35); padding: 26px;
+  }
   [hidden] { display: none !important; }
-  footer { color: var(--muted); font-size: .85rem; margin-top: 28px; }
+
+  /* drop zone */
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .dropzone {
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px;
+    border: 1.5px dashed rgba(255, 255, 255, .34); border-radius: 18px; padding: 38px 18px; cursor: pointer;
+    transition: background .2s, border-color .2s;
+  }
+  .dropzone:hover, .dropzone.over, .visually-hidden:focus-visible + .dropzone { background: rgba(255, 255, 255, .07); border-color: rgba(255, 255, 255, .6); }
+  .dz-icon { width: 46px; height: 46px; margin-bottom: 6px; opacity: .9; }
+  .dz-title { font-size: 1.12rem; font-weight: 600; }
+  .dz-hint { color: var(--ink-soft); font-size: .93rem; }
+  .btn {
+    appearance: none; font: inherit; font-weight: 600; letter-spacing: .01em; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 26px;
+    border-radius: 999px; border: 1px solid transparent; color: var(--accent-ink); background: var(--accent);
+    box-shadow: 0 6px 20px rgba(8, 12, 32, .28); transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(8, 12, 32, .34); }
+  .btn:active { transform: translateY(0); }
+  .btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: rgba(255, 255, 255, .38); box-shadow: none; }
+  .btn.ghost:hover { background: rgba(255, 255, 255, .09); }
+  .dropzone .btn { margin-top: 14px; }
+  .btn svg { width: 18px; height: 18px; flex: none; }
+  .facts { margin: 18px 2px 0; padding: 0; list-style: none; display: grid; gap: 8px; color: var(--ink-soft); font-size: .9rem; }
+  .facts li { display: flex; gap: 10px; align-items: flex-start; }
+  .facts svg { width: 16px; height: 16px; flex: none; margin-top: 4px; opacity: .85; }
+  .tip { margin: 14px 0 0; padding: 12px 14px; border-radius: 14px; background: rgba(255, 255, 255, .08); color: var(--ink-soft); font-size: .9rem; }
+  .tip strong { color: var(--ink); font-weight: 600; }
+
+  /* working */
+  .work-title { font-size: 1.2rem; font-weight: 600; margin: 0 0 4px; }
+  .bar { height: 8px; border-radius: 99px; background: rgba(255, 255, 255, .16); overflow: hidden; margin: 18px 0 12px; }
+  .bar > span { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #ffd9b0, #ffffff); transition: width .2s ease; }
+  .muted { color: var(--ink-soft); font-size: .92rem; }
+  .error { color: var(--danger); }
+
+  /* done */
+  .done-title { font-size: 1.4rem; font-weight: 600; margin: 0 0 4px; letter-spacing: -.01em; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; }
+  .chip { padding: 5px 12px; border-radius: 99px; background: rgba(255, 255, 255, .1); border: 1px solid var(--glass-line); font-size: .85rem; color: var(--ink-soft); }
+  .downloads { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 10px; }
+  .dl {
+    width: 100%; display: flex; align-items: center; gap: 14px; text-align: left; font: inherit; color: var(--ink);
+    padding: 14px 16px; border-radius: 16px; cursor: pointer; background: rgba(255, 255, 255, .09); border: 1px solid var(--glass-line);
+    transition: background .15s, transform .15s;
+  }
+  .dl:hover { background: rgba(255, 255, 255, .16); transform: translateY(-1px); }
+  .dl:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .dl svg { width: 22px; height: 22px; flex: none; }
+  .dl .t { flex: 1; min-width: 0; }
+  .dl .t b { display: block; font-weight: 600; overflow-wrap: anywhere; }
+  .dl .t span { color: var(--ink-soft); font-size: .86rem; }
+  .dl.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; box-shadow: 0 8px 24px rgba(8, 12, 32, .3); }
+  .dl.primary .t span { color: rgba(26, 39, 80, .7); }
+  .dl.primary:hover { background: #fff; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  details { margin-top: 16px; border-top: 1px solid var(--glass-line); padding-top: 12px; }
+  summary { cursor: pointer; color: var(--ink-soft); font-size: .95rem; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "›"; display: inline-block; width: 1em; transition: transform .15s; }
+  details[open] > summary::before { transform: rotate(90deg); }
+  pre { overflow: auto; max-height: 300px; margin: 12px 0 0; padding: 14px; border-radius: 12px; background: rgba(5, 9, 24, .45); font-size: .8rem; line-height: 1.5; color: var(--ink-soft); }
+  ul.plain { margin: 10px 0 0; padding-left: 1.1em; color: var(--ink-soft); font-size: .88rem; }
+  footer { margin-top: auto; padding-top: 30px; text-align: center; color: var(--ink-faint); font-size: .8rem; text-shadow: 0 1px 12px rgba(10, 16, 40, .5); }
+  footer a { color: inherit; }
+  @media (max-width: 480px) { .panel { padding: 18px; } .dropzone { padding: 30px 14px; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
+<div class="scene" aria-hidden="true"></div>
 <main>
-  <h1>📷 Photo Organiser</h1>
-  <p class="lead">Sorts copies of your photos into <strong>Date → Location</strong> folders using the date and GPS stored inside each photo. Your originals are never changed.</p>
-  <div class="banner">🔒 Everything runs in <strong>your browser, on this device</strong>. Your photos are never uploaded anywhere.</div>
-
-  <section class="card">
-    <h2>1 · Choose your photos</h2>
-    <label for="photos">Photos (JPG, HEIC, PNG, WebP, TIFF) – you can pick hundreds at once</label>
-    <input id="photos" type="file" accept="image/*" multiple>
-    <p id="pickedInfo" class="small"></p>
-    <p id="pickedWarn" class="small"></p>
-    <div class="tip">📱 <strong>iPhone:</strong> in the photo picker tap <strong>Options</strong> and turn on <strong>Location</strong>, otherwise iOS removes the GPS and photos can only be sorted by date.</div>
-
-    <h2 style="margin-top:16px">Options</h2>
-    <label class="check"><input id="consent" type="checkbox">
-      <span>Look up town/city names (sends rounded GPS coordinates to OpenStreetMap)</span></label>
-    <div id="consentDetails" class="small" hidden>
-      <p>Each unique photo location (rounded to about 1&nbsp;km) is sent to the public OpenStreetMap Nominatim service together with your IP address – never the photos. Limited to one request per second, and remembered in this browser so repeats are not asked again. Leave this off to sort into date folders only.</p>
-      <label for="language">Place-name language (optional, e.g. en)</label>
-      <input id="language" type="text" autocomplete="off" placeholder="blank = local names">
+  <header>
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-6 4 4 3-3 6 5"/><circle cx="16.5" cy="7.5" r="1.8"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
+      Photo Organiser
     </div>
-    <label for="fallback">If a photo has no embedded date</label>
-    <select id="fallback"></select>
-    <p class="small">Photos saved from chat apps often lose their date. These options only give a labelled ESTIMATE when no real date exists.</p>
-    <label class="check"><input id="includeGps" type="checkbox"><span>Include GPS coordinates in the CSV report</span></label>
-    <label for="partSize">Split the download into ZIP files of up to</label>
-    <select id="partSize">
-      <option value="200">200 MB (safest on phones)</option>
-      <option value="400" selected>400 MB</option>
-      <option value="1000">1 GB (computers)</option>
-    </select>
-  </section>
+    <h1>Your photos, sorted<br>by date and place.</h1>
+    <p class="sub">Choose your photos and get them back in tidy folders. Nothing to set up.</p>
+  </header>
 
-  <section class="card">
-    <h2>2 · Analyse</h2>
-    <p class="small">Reads each photo's capture date and GPS. Nothing is copied yet, and only the start of each file is read.</p>
-    <button id="analyseBtn" class="btn" type="button">🔍 Analyse photos</button>
-    <p id="stale" class="note" hidden>Your options changed since the last analysis. Click <strong>Analyse photos</strong> again before organising.</p>
-    <div id="progress" hidden style="margin-top:12px">
-      <progress id="bar" max="1" value="0"></progress>
-      <div id="barLabel" class="small">Starting...</div>
-      <div id="barTiming" class="small"></div>
+  <section class="panel" id="stage">
+    <!-- 1. choose -->
+    <div id="idleView">
+      <input id="photos" class="visually-hidden" type="file" accept="image/*" multiple>
+      <label class="dropzone" id="dropzone" for="photos">
+        <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4m0 0L8 8m4-4l4 4"/><path d="M4 15v2a3 3 0 003 3h10a3 3 0 003-3v-2"/></svg>
+        <span class="dz-title">Drop your photos here</span>
+        <span class="dz-hint">JPG, HEIC, PNG, WebP or TIFF. Hundreds at once is fine.</span>
+        <span class="btn" aria-hidden="true">Choose photos</span>
+      </label>
+      <ul class="facts">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
+          <span>Your photos never leave this device. They are read and packed right here in your browser.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.2 7-11a7 7 0 10-14 0c0 5.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          <span>To name places, rounded GPS coordinates (about 1&nbsp;km, never the photos) are sent to OpenStreetMap.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h6l2 2h8v9a2 2 0 01-2 2H6a2 2 0 01-2-2z"/></svg>
+          <span>Photos without a date are sorted using the date in their filename, or when the file was saved.</span></li>
+      </ul>
+      <p class="tip"><strong>On iPhone?</strong> In the photo picker tap <strong>Options</strong> and switch on <strong>Location</strong>, or iOS removes the place information from your photos.</p>
+    </div>
+
+    <!-- 2. working -->
+    <div id="workView" hidden>
+      <p class="work-title" id="workTitle">Sorting your photos</p>
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="barWrap"><span id="bar"></span></div>
+      <div class="muted" id="barLabel">Starting...</div>
+      <div class="muted" id="barTiming"></div>
+      <p class="muted" style="margin-top:14px">Keep this page open until it finishes.</p>
+    </div>
+
+    <!-- 3. done -->
+    <div id="doneView" hidden>
+      <h2 class="done-title" id="doneTitle">Your photos are ready</h2>
+      <div class="muted" id="doneText"></div>
+      <div class="chips" id="chips"></div>
+      <ul class="downloads" id="downloads"></ul>
+      <div id="notes"></div>
+      <details id="treeBox">
+        <summary>Preview the folders</summary>
+        <pre id="tree"></pre>
+      </details>
+      <details id="problemsBox" hidden>
+        <summary id="problemsTitle">Needs attention</summary>
+        <ul class="plain" id="problems"></ul>
+      </details>
+      <details id="skippedBox" hidden>
+        <summary id="skippedSummary"></summary>
+        <pre id="skippedList"></pre>
+      </details>
+      <div class="row"><button class="btn ghost" id="againBtn" type="button">Sort more photos</button></div>
     </div>
   </section>
 
-  <section id="results" class="card" hidden>
-    <h2>Results</h2>
-    <div id="metrics" class="metrics"></div>
-    <div id="notes"></div>
-    <details open>
-      <summary>📁 Folder preview</summary>
-      <p id="attribution" class="small"></p>
-      <table id="folderTable"></table>
-      <pre id="tree"></pre>
-    </details>
-    <details>
-      <summary id="problemsTitle">Needs attention</summary>
-      <ul id="problems"></ul>
-    </details>
-    <details id="skipped" hidden>
-      <summary id="skippedSummary"></summary>
-      <p class="small">Supported: JPG, HEIC, PNG, WebP, TIFF. Videos, RAW and GIF/BMP files are skipped.</p>
-      <pre id="skippedList"></pre>
-    </details>
-  </section>
-
-  <section id="organiseCard" class="card" hidden>
-    <h2>3 · Organise and download</h2>
-    <p class="small">Your organised photos are packed into ZIP files on this device for you to download. This can take a few minutes for hundreds of photos – keep this page open.</p>
-    <button id="organiseBtn" class="btn" type="button">📂 Organise photos</button>
-    <p id="done" style="margin-top:12px"></p>
-    <ul id="downloads" class="dl"></ul>
-  </section>
-
-  <footer>Place names © OpenStreetMap contributors. EXIF reading by <a href="https://github.com/MikeKovarik/exifr">exifr</a> (MIT). <a href="https://github.com/ethanyeojy/photo-organiser">Source code</a>.</footer>
+  <footer>
+    Place names &copy; OpenStreetMap contributors &middot; Metadata reading by <a href="https://github.com/MikeKovarik/exifr">exifr</a> &middot;
+    <a href="https://github.com/ethanyeojy/photo-organiser">Source</a>
+  </footer>
 </main>
 <script src="vendor/exifr.full.umd.js"></script>
 <script type="module" src="app.mjs"></script>

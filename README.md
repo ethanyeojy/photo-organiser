@@ -7,7 +7,7 @@ stored inside each photo. Originals are never modified, moved or deleted.
 
 The [`docs/`](docs/) folder is a static website (published with GitHub Pages) that does the same job **entirely in the
 browser**: photos are read on your device, never uploaded, and the result is downloaded as ZIP files. Large selections
-are split into several ZIPs (200 MB / 400 MB / 1 GB) so phones do not run out of memory. It is plain JavaScript
+are split into several ZIPs (about 250 MB each) so phones do not run out of memory. There are no options: it reads dates and GPS, names places, uses the filename date (then the file-saved date) when a photo has no embedded date, and packs the ZIPs automatically. It is plain JavaScript
 (`docs/organiser.mjs` = logic, `docs/app.mjs` = page); tests: `node --test webtests/`.
 
 ## Python version: setup (Python 3.9 or newer)
