@@ -18,7 +18,7 @@ from photo_organiser.output import copy_photos, create_run_dir, make_zip, write_
 from photo_organiser.pipeline import (
     analyse_photos, build_tree_text, group_counts, plan_destinations, summarise,
 )
-from photo_organiser.scanner import scan_folder, validate_folders
+from photo_organiser.scanner import SUPPORTED_EXTENSIONS, scan_folder, validate_folders
 from photo_organiser.ziputil import extract_jpegs
 
 APP_DIR = Path(__file__).resolve().parent
@@ -157,9 +157,14 @@ with st.container(border=True):
         st.caption("This path is on the computer **running this app** (your own PC, if you started it yourself). "
                    "Reading in place is the fastest option because nothing is copied until you organise.")
     elif source_kind == SRC_PHOTOS:
-        uploads = st.file_uploader("Drop photos here (JPG, HEIC, PNG, WebP, TIFF)", type=["jpg", "jpeg", "heic", "heif", "png", "webp", "tif", "tiff"],
-                                   accept_multiple_files=True, key="uploads")
-        st.caption("Good for a handful of photos. For large sets, use a folder or a ZIP.")
+        # No `type=` filter: some phone browsers mishandle it and drop files. We filter by extension below.
+        picked = st.file_uploader("Choose photos (JPG, HEIC, PNG, WebP, TIFF)",
+                                  accept_multiple_files=True, key="uploads")
+        uploads = [f for f in picked if Path(f.name).suffix.lower() in SUPPORTED_EXTENSIONS]
+        if len(picked) > len(uploads):
+            st.warning(f"{len(picked) - len(uploads)} file(s) ignored because they are not supported photo types.")
+        st.caption("Good for a handful of photos (about 20 at a time on a phone). "
+                   "For large sets, use a ZIP" + ("." if IS_ONLINE else " or a folder."))
     else:
         zip_upload = st.file_uploader("Drop a .zip file containing photos", type=["zip"], key="zip_upload")
         st.caption("The ZIP is unpacked into a temporary folder on this computer and only photo files (JPG, HEIC, PNG, WebP, TIFF) are used. "
