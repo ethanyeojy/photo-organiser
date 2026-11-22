@@ -3,7 +3,14 @@
 Copies photos (JPG, HEIC, PNG, WebP, TIFF) into `Organised Photos / YYYY-MM-DD / Location / filename` using the date and GPS
 stored inside each photo. Originals are never modified, moved or deleted.
 
-## Setup (Python 3.9 or newer)
+## Website version (no install, works on phones)
+
+The [`docs/`](docs/) folder is a static website (published with GitHub Pages) that does the same job **entirely in the
+browser**: photos are read on your device, never uploaded, and the result is downloaded as ZIP files. Large selections
+are split into several ZIPs (200 MB / 400 MB / 1 GB) so phones do not run out of memory. It is plain JavaScript
+(`docs/organiser.mjs` = logic, `docs/app.mjs` = page); tests: `node --test webtests/`.
+
+## Python version: setup (Python 3.9 or newer)
 
 ```bash
 cd photo-organiser
