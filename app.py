@@ -1,6 +1,7 @@
 """Photo Organiser - Streamlit interface.  Run with:  streamlit run app.py"""
 from __future__ import annotations
 
+import os
 import shutil
 import tempfile
 import time
@@ -24,7 +25,12 @@ APP_DIR = Path(__file__).resolve().parent
 DEFAULT_OUTPUT = Path.home() / "Pictures" / "Photo Organiser Output"  # the user's own folder, not the app's
 CACHE_PATH = APP_DIR / ".cache" / "geocode_cache.json"
 
+# Running on a hosted server (e.g. Streamlit Community Cloud)? Then there is no "this computer" folder to read
+# or save to: use uploads and downloads only. Set PHOTO_ORGANISER_ONLINE=1 to force this mode.
+IS_ONLINE = bool(os.environ.get("PHOTO_ORGANISER_ONLINE")) or APP_DIR.as_posix().startswith("/mount/src")
+
 SRC_FOLDER, SRC_PHOTOS, SRC_ZIP = "Folder on this computer (fastest)", "Upload photos", "Upload a ZIP of photos"
+SOURCE_CHOICES = [SRC_PHOTOS, SRC_ZIP] if IS_ONLINE else [SRC_FOLDER, SRC_PHOTOS, SRC_ZIP]
 
 st.set_page_config(page_title="Photo Organiser", page_icon="📷", layout="wide")
 st.session_state.setdefault("analysis", None)
@@ -94,7 +100,11 @@ def fresh_temp_dir() -> Path:
 # ================================================================ sidebar
 with st.sidebar:
     st.header("⚙️ Options")
-    st.success("🔒 Everything runs on this computer. Photos are never uploaded anywhere.")
+    if IS_ONLINE:
+        st.info("☁️ Your photos are uploaded to this website's server to be sorted, then you download the "
+                "result. Nothing is kept permanently - download your ZIP before closing the page.")
+    else:
+        st.success("🔒 Everything runs on this computer. Photos are never uploaded anywhere.")
     consent = st.checkbox(
         "Look up town/city names (sends GPS coordinates to OpenStreetMap)",
         value=False, key="consent",
@@ -118,8 +128,11 @@ with st.sidebar:
     date_fallback = next(k for k, v in FALLBACK_LABELS.items() if v == fallback_label)
     st.divider()
     include_gps = st.checkbox("Include GPS coordinates in the CSV report", value=False, key="include_gps")
-    output_text = st.text_input("Output folder", value=str(DEFAULT_OUTPUT), key="output_dir",
-                                help="Each run creates a new sub-folder here. Originals are never changed.")
+    if IS_ONLINE:
+        output_text = str(Path(tempfile.gettempdir()) / "photo_organiser_output")
+    else:
+        output_text = st.text_input("Output folder", value=str(DEFAULT_OUTPUT), key="output_dir",
+                                    help="Each run creates a new sub-folder here. Originals are never changed.")
     st.caption(ATTRIBUTION)
 
 output_base = Path(output_text.strip().strip('"').strip("'")).expanduser()
@@ -133,7 +146,7 @@ st.markdown("**1** Choose photos &nbsp;→&nbsp; **2** Analyse and preview &nbsp
 # ================================================================ 1. choose
 with st.container(border=True):
     st.subheader("1 · Choose your photos")
-    source_kind = st.radio("Where are the photos?", [SRC_FOLDER, SRC_PHOTOS, SRC_ZIP],
+    source_kind = st.radio("Where are the photos?", SOURCE_CHOICES,
                            horizontal=True, key="source_kind")
     uploads, zip_upload, folder_text, recursive = [], None, "", True
     if source_kind == SRC_FOLDER:
@@ -319,7 +332,10 @@ if analysis:
     stale = analysis["signature"] != signature
     with st.container(border=True):
         st.subheader("3 · Organise")
-        st.caption(f"Copies are saved to a new folder inside `{output_base}` (change it in the sidebar).")
+        if IS_ONLINE:
+            st.caption("Your organised photos are packed into a ZIP for you to download.")
+        else:
+            st.caption(f"Copies are saved to a new folder inside `{output_base}` (change it in the sidebar).")
         if st.button("📂 Organise photos", type="primary", disabled=stale, key="organise_btn"):
             tracker = Tracker("Organising photos...")
             try:
@@ -342,8 +358,12 @@ if analysis:
         if result:
             copied = sum(r.status.startswith("Copied") for r in records)
             failed = [r for r in records if r.status.startswith("Copy failed")]
-            st.success(f"Done: {copied} of {len(records)} photos copied and saved on this computer in "
-                       f"`{result['run_dir']}`")
+            if IS_ONLINE:
+                st.success(f"Done: {copied} of {len(records)} photos organised. Download your ZIP below "
+                           "before closing this page.")
+            else:
+                st.success(f"Done: {copied} of {len(records)} photos copied and saved on this computer in "
+                           f"`{result['run_dir']}`")
             cols = st.columns(4)
             cols[0].metric("Copied", copied)
             cols[1].metric("Copy failed", len(failed))
